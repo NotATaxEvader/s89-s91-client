@@ -47,15 +47,16 @@ function showEditForm() {
     editVisible.value = !editVisible.value
 }
 
-function adminOrUser () {
-    if(userStore.user.id){
-        if (userStore.user.id === post.data.authorInfo)
+function adminOrUser (id) {
+    if(id){
+        if (userStore.user.id === id)
             return true;
         else if (userStore.user.isAdmin)
             return true
         else
             return false
-    }
+    } else
+        return false
 }
 
 function deletePost () {
@@ -101,7 +102,7 @@ function editPost() {
 }
 
 function addComment() {
-    api.patch(`/posts/addComment/${id}`, {
+    api.post(`/posts/addComment/${id}`, {
             comment: comment.value
         })
         .then(response => {
@@ -111,7 +112,8 @@ function addComment() {
 
                 notyf.success("Comment Added Successful")
 
-                router.go();
+                fetchPost();
+                showForm();
             } else 
                 notyf.error('Invalid Credentials');
         })
@@ -135,8 +137,8 @@ onMounted(fetchPost)
         <h1>{{ post.data.title }}</h1>
         <h5>Author: {{ post.data.authorInfo }}</h5>
         <h5>Created On: {{ post.data.creationDate }}</h5>
-        <button class="btn btn-danger" v-on:click="deletePost" v-if="adminOrUser">Delete Post</button>
-        <button class="btn btn-warning ms-4" v-on:click="showEditForm" v-if="adminOrUser">Edit Post</button>
+        <button class="btn btn-danger" v-on:click="deletePost" v-if="adminOrUser(post.data.userId)">Delete Post</button>
+        <button class="btn btn-warning ms-4" v-on:click="showEditForm" v-if="adminOrUser(post.data.userId)">Edit Post</button>
 
         <form @submit.prevent="editPost" class="p-5" :hidden="!editVisible">
             <div class="mb-3">
